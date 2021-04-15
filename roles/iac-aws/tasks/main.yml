@@ -2,6 +2,10 @@
 #############################################################################
 ## Create/Deletes AWS Infrastructure
 #############################################################################
+- name: Set tf_directory
+  set_fact:
+    tf_directory: "{{ playbook_dir }}/terraform/{{ aws_account_name }}"
+
 - name: Create list of terraform template folders
   block:
     - name: Initialize an empty list
@@ -10,18 +14,18 @@
 
     - name: Find folders for terraform templates
       find:
-        paths: "{{ role_path }}/files/{{ aws_account_name }}"
+        paths: "{{ tf_directory }}"
         file_type: "directory"
       register: dirlist
 
     - debug:
-        msg: "{{ dirlist.files | map(attribute='path') | list }}"
+        msg: "{{ dirlist.files | map(attribute='path') | list | sort }}"
         verbosity: 1
 
     - name: Parse Folders
       set_fact:
         tf_blast_radius_tmp: "{{ tf_blast_radius_tmp + [ item | basename ] }}"
-      loop: "{{ dirlist.files | map(attribute='path') | list }}"
+      loop: "{{ dirlist.files | map(attribute='path') | list | sort }}"
 
     - name: Set tf_blast_radius
       set_fact:
@@ -29,5 +33,5 @@
   when: tf_blast_radius_all in tf_blast_radius
 
 - name: AWS Infrastructure. Target State - {{ tf_target_state }}
-  include: terraform.yml folder="{{ item }}"
+  include: terraform.yml tf_stack="{{ item }}"
   loop: "{{ tf_blast_radius }}"

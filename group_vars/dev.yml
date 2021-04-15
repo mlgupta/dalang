@@ -7,3 +7,17 @@ group_vars:
         userid: ""
         company: ""
         organization: ""
+    vpc_vars:
+        azs:
+            - us-east-1a
+            - us-east-1b
+            - us-east-1c
+        vpc_cidr: "10.11.0.0/16"
+        public_subnet_cidr:
+            - 10.11.1.0/24
+            - 10.11.4.0/24
+            - 10.11.7.0/24
+        private_subnet_cidr:
+            - 10.11.3.0/24
+            - 10.11.6.0/24
+            - 10.11.9.0/24

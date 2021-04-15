@@ -1,24 +1,24 @@
 - name: Check if folder exists
   stat:
-    path: "{{ role_path }}/files/{{ aws_account_name }}/{{ folder }}"
-  register: folder_data
+    path: "{{ tf_directory }}/{{ tf_stack }}"
+  register: tf_folder_data
 
 - name: Report a missing folder
   debug:
-    msg: "Ignoring missing folder {{ folder }}"
-  when: not folder_data.stat.exists
+    msg: "Ignoring missing folder {{ tf_stack }}"
+  when: not tf_folder_data.stat.exists
 
 - block:
     - name: AWS. Target State - {{ tf_target_state }}
       terraform:
-        project_path: "{{ role_path }}/files/{{ aws_account_name }}/{{ folder }}"
+        project_path: "{{ tf_directory }}/{{ tf_stack }}"
         state: "{{ tf_target_state }}"
         force_init: true
         lock: yes
         backend_config:
           region: "{{ aws_default_region }}"
           bucket: "{{ tf_bucket }}"
-          key: "{{ folder }}.tfstate"
+          key: "{{ tf_stack }}.tfstate"
           dynamodb_table: "{{ tf_dynamodb_table }}"
           role_arn: "arn:aws:iam::{{ group_vars.account_id }}:role/{{ all_vars.tfrole }}"
           encrypt: "true"
@@ -34,15 +34,15 @@
 
     - name: AWS. Target State - {{ tf_target_state }}
       terraform:
-        project_path: "{{ role_path }}/files/{{ aws_account_name }}/{{ folder }}"
+        project_path: "{{ tf_directory }}/{{ tf_stack }}"
         state: "{{ tf_target_state }}"
         force_init: true
         lock: yes
-        plan_file: "{{ role_path }}/files/{{ aws_account_name }}/{{ folder }}/{{ folder }}.tfplan"
+        plan_file: "{{ tf_directory }}/{{ tf_stack }}/{{ tf_stack }}.tfplan"
         backend_config:
           region: "{{ aws_default_region }}"
           bucket: "{{ tf_bucket }}"
-          key: "{{ folder }}.tfstate"
+          key: "{{ tf_stack }}.tfstate"
           dynamodb_table: "{{ tf_dynamodb_table }}"
           role_arn: "arn:aws:iam::{{ group_vars.account_id }}:role/{{ all_vars.tfrole }}"
           encrypt: "true"
@@ -59,4 +59,4 @@
     - debug:
         msg: "{{ output }}"
       when: tf_target_state in ["planned"]
-  when: folder_data.stat.exists
+  when: tf_folder_data.stat.exists

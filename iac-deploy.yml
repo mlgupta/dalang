@@ -21,12 +21,12 @@
       - always
   - name: Set Variables
     set_fact:
-      aws_access_key_id: "{{ aws_secret_vars[aws_account_name + '_aws_access_key_id'] }}"
-      aws_secret_access_key: "{{ aws_secret_vars[aws_account_name + '_aws_secret_access_key'] }}"
-      aws_default_region: "{{ aws_secret_vars[aws_account_name + '_aws_default_region'] }}"
+      aws_access_key_id: "{{ aws_secret_vars[all_vars.org_account_name + '_aws_access_key_id'] }}"
+      aws_secret_access_key: "{{ aws_secret_vars[all_vars.org_account_name + '_aws_secret_access_key'] }}"
+      aws_default_region: "{{ aws_secret_vars[all_vars.org_account_name + '_aws_default_region'] }}"
       tf_bucket: "{{ all_vars.tfstate_namespace + '-' + aws_account_name + '-' + all_vars.tfstate_name + '-state'}}"
       tf_dynamodb_table: "{{ all_vars.tfstate_namespace + '-' + aws_account_name + '-' + all_vars.tfstate_name + '-state-lock'}}"
-      tf_blast_radius: "{{ ansible_run_tags }}"
+      tf_blast_radius: "{{ ansible_run_tags | sort }}"
     tags:
       - always
 
