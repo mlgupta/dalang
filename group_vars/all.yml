@@ -1,0 +1,12 @@
+---
+all_vars:
+    tfstate_namespace: dbs
+    tfstate_stage: org
+    tfstate_name: terraform
+    tfuser: TerraformUser
+    tfrole: TerraformRole
+    tfpolicy: TerraformPolicy
+    tfuserpolicy: TerraformUserAccess
+    org_account_id: 612336603685
+    org_account_name: org
+    org_user_cred_file: /tmp/tfuser.cred

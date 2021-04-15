@@ -1,0 +1,33 @@
+---
+#############################################################################
+## Create/Deletes AWS Infrastructure
+#############################################################################
+- name: Create list of terraform template folders
+  block:
+    - name: Initialize an empty list
+      set_fact:
+        tf_blast_radius_tmp: []
+
+    - name: Find folders for terraform templates
+      find:
+        paths: "{{ role_path }}/files/{{ aws_account_name }}"
+        file_type: "directory"
+      register: dirlist
+
+    - debug:
+        msg: "{{ dirlist.files | map(attribute='path') | list }}"
+        verbosity: 1
+
+    - name: Parse Folders
+      set_fact:
+        tf_blast_radius_tmp: "{{ tf_blast_radius_tmp + [ item | basename ] }}"
+      loop: "{{ dirlist.files | map(attribute='path') | list }}"
+
+    - name: Set tf_blast_radius
+      set_fact:
+        tf_blast_radius: "{{ tf_blast_radius_tmp }}"
+  when: tf_blast_radius_all in tf_blast_radius
+
+- name: AWS Infrastructure. Target State - {{ tf_target_state }}
+  include: terraform.yml folder="{{ item }}"
+  loop: "{{ tf_blast_radius }}"

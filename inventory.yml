@@ -1,0 +1,17 @@
+---
+all:
+  hosts:
+    dbsdev:
+  children:
+    org:
+      hosts:
+        dbsorg:
+    dev:
+      hosts:
+        dbsdev:
+#    test:
+#      hosts:
+#        dbstest:
+#    prod:
+#      hosts:
+#        dbsprod:

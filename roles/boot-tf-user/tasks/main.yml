@@ -1,0 +1,24 @@
+---
+#############################################################################
+## Create/Deletes terraform user for org environment
+#############################################################################
+- name: Terraform User in org account. Target State - {{ tf_target_state }}
+  when: all_vars.org_account_name in group_names
+  terraform:
+    project_path: "{{ role_path }}/files"
+    state: "{{ tf_target_state }}"
+    force_init: true
+    lock: yes
+    backend_config:
+      region: "{{ aws_default_region }}"
+      bucket: "{{ tf_bucket }}"
+      key: "tf-user.tfstate"
+      dynamodb_table: "{{ tf_dynamodb_table }}"
+      encrypt: "true"
+    variables:
+      all_vars: "{{ all_vars | to_json }}"
+      group_vars: "{{ group_vars | to_json }}"
+  environment: 
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
+    AWS_DEFAULT_REGION: "{{ aws_default_region }}"

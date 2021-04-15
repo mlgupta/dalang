@@ -1,0 +1,25 @@
+#  Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# .tfplan files
+*.tfplan
+*.tfplan.*
+
+.password
+.vault_pass
+aws-secrets.yml
+aws-deploy-secrets.yml
+env/
+tt.yml
+*.retry
+*/__pycache__
+*.pyc
+*.log
+.idea
+*.iws
+*.iml
+*.ipr

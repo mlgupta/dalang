@@ -1,0 +1,9 @@
+---
+group_vars:
+    account_id: 612336603685
+    account_name: org
+    default_tags:
+        owner: ""
+        userid: ""
+        company: ""
+        organization: ""

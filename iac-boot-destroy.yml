@@ -1,0 +1,41 @@
+#########################################################################################
+# iac-boot-destroy.yml
+#   Playbook to destroy all terraform artifacts:
+#    - Deletes Terraform Role
+#    - Deletes TerraformUser (for org account)
+#    - Unconfigures S3 backend 
+#    - Deletes S3 backend
+#########################################################################################
+- name: Destroy Terraform AWS Backend
+  hosts: all
+  connection: local
+  gather_facts: no
+  vars:
+    aws_account_name: "{{ group_names[0] }}"
+    aws_account_name_list: "{{ groups.keys()  | reject('match', 'all') | reject('match', 'ungrouped') }}"
+    tf_target_state: "absent"
+    backend_vars: 
+      terraform_backend_config_file_path: ''
+      force_destroy: 'true'
+
+  pre_tasks:
+  - name: Read Secret Variable
+    include_vars:
+      file: aws-secrets.yml
+      name: aws_secret_vars
+    tags:
+      - always
+  - name: Set Variables
+    set_fact:
+      aws_access_key_id: "{{ aws_secret_vars[aws_account_name + '_aws_access_key_id'] }}"
+      aws_secret_access_key: "{{ aws_secret_vars[aws_account_name + '_aws_secret_access_key'] }}"
+      aws_default_region: "{{ aws_secret_vars[aws_account_name + '_aws_default_region'] }}"
+      tf_bucket: "{{ all_vars.tfstate_namespace + '-' + aws_account_name + '-' + all_vars.tfstate_name + '-state'}}"
+      tf_dynamodb_table: "{{ all_vars.tfstate_namespace + '-' + aws_account_name + '-' + all_vars.tfstate_name + '-state-lock'}}"
+    tags:
+      - always
+
+  roles:
+   - { role: boot-tf-role, secrets: "{{ aws_secret_vars }}"  }
+   - { role: boot-tf-user, secrets: "{{ aws_secret_vars }}"  }
+   - { role: boot-tf-backend, secrets: "{{ aws_secret_vars }}"  }

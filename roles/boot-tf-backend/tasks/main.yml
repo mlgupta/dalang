@@ -1,0 +1,68 @@
+---
+#############################################################################
+## 1. Create encrypted S3 backend and Dynamodb table
+## 2. Move tfstate to S3
+## 3. Create a new S3 bucket and setup sync with S3 backend bucket
+## 4. Create workspaces for each target environment
+## 5. Create terraform role for each target environment
+#############################################################################
+- name: Create S3 bucket and DynamoDB Table
+  when: tf_target_state in ["present","planned"]
+  terraform:
+    project_path: "{{ role_path }}/files/{{ aws_account_name }}"
+    state: "{{ tf_target_state }}"
+    force_init: true
+    lock: yes
+    variables:
+      all_vars: "{{ all_vars | to_json }}"
+      group_vars: "{{ group_vars | to_json }}"
+      backend_vars: "{{ backend_vars | to_json }}"
+  environment: 
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
+    AWS_DEFAULT_REGION: "{{ aws_default_region }}"
+
+- name: Modify S3 backend for deletion
+  when: tf_target_state in ["absent"]
+  terraform:
+    project_path: "{{ role_path }}/files/{{ aws_account_name }}"
+    state: "present"
+    force_init: true
+    lock: yes
+    targets: ["module.terraform_state_backend"]
+    variables:
+      all_vars: "{{ all_vars | to_json }}"
+      group_vars: "{{ group_vars | to_json }}"
+      backend_vars: "{{ backend_vars | to_json }}"
+  environment: 
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
+    AWS_DEFAULT_REGION: "{{ aws_default_region }}"
+
+- name: Copy local backend to S3
+  when: true
+  shell: terraform init -force-copy
+  args:
+    chdir: "{{ role_path }}/files/{{ aws_account_name }}"
+  environment: 
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
+    AWS_DEFAULT_REGION: "{{ aws_default_region }}"
+
+- name: Delete S3 backend
+  when: tf_target_state in ["absent"]
+  terraform:
+    project_path: "{{ role_path }}/files/{{ aws_account_name }}"
+    state: "{{ tf_target_state }}"
+    force_init: true
+    lock: yes
+    variables:
+      all_vars: "{{ all_vars | to_json }}"
+      group_vars: "{{ group_vars | to_json }}"
+      backend_vars: "{{ backend_vars | to_json }}"
+  environment: 
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
+    AWS_DEFAULT_REGION: "{{ aws_default_region }}"
+
+
