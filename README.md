@@ -73,16 +73,16 @@ all_vars:
 
 | Name | Description |
 |------|-------------|
-| tfstate_namespace | |
-| tfstate_stage | |
-| tfstate_name | |
-| tfuser | |
-| tfrole | |
-| tfpolicy | |
-| tfuserpolicy | |
-| org_account_id | |
-| org_account_name | |
-| org_user_cred_file | |
+| tfstate_namespace | S3 backend gets created in a form \<tfstate_namespace\>-\<tfstate_stage\>-\<tfstate_name\>-state. Typically, this can be set to abbreviation for your organization.|
+| tfstate_stage | Environment AWS account corresponds to. for e.g. dev, test, etc|
+| tfstate_name | Set it to "terraform"|
+| tfuser | This is the user gets created in the "org" account. ```iac-deploy.yum```, and other playbooks use this user to authenticate against AWS, and then perform assume role for the target AWS environment.|
+| tfrole | This is the role assumed by ```iac-deploy.yml``` playbook to deploy resources in the target AWS account. |
+| tfpolicy | Name of the AWS IAM policy created in the target AWS account. This policy is attached to the tfrole. |
+| tfuserpolicy | Name of the AWS IAM policy in the "org" account. It has minimal permission that allows this user to perform assume role against the target AWS environment. |
+| org_account_id | AWS account ID for the "org" account|
+| org_account_name | AWS account name for the "org" account. We recommend this to be set to "org" |
+| org_user_cred_file | Credential file for tfuser created by ```iac-boot.yml```. Content of this file must be entered into ansible-vault file ```aws-deploy-secrets.yml```. This file has the same syntax as ```aws-secrets.yml```.|
 
 
 3. Modify each AWS environment's group_vars file. Please note that Ansible passes parameters defined in these files to terraform, as per terraform template definition. So, for each terraform stack you define that requires variables, that needs to be defined here.
@@ -116,9 +116,9 @@ group_vars:
 
 | Name | Description |
 |------|-------------|
-| account_id | |
-| account_name | |
-| default_tags | |
+| account_id | AWS account ID for the target AWS account. |
+| account_name | AWS account name. for e.g. org, dev, test, prod, etc |
+| default_tags | Default tags that needs to be applied to each AWS resource that is created in this AWS account. |
 
 Above ```vpc_vars``` is defined as dict. Ansible passes these to terraform stack ```0100-vpc```.
 
@@ -127,27 +127,49 @@ Above ```vpc_vars``` is defined as dict. Ansible passes these to terraform stack
 The file has following structure:
 
 ```
-org_aws_access_key_id: AKIAY5EQ5CISQBCDJC6K
-org_aws_secret_access_key: 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
+org_aws_access_key_id: XXXXXXXXXXXXX
+org_aws_secret_access_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 org_aws_default_region: us-east-1
-dev_aws_access_key_id: AKIAY5EQ5CISQBCDJC6K
-dev_aws_secret_access_key: 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
+dev_aws_access_key_id: XXXXXXXXXXXXX
+dev_aws_secret_access_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 dev_aws_default_region: us-east-1
-test_aws_access_key_id: AKIAY5EQ5CISQBCDJC6K
-test_aws_secret_access_key: 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
+test_aws_access_key_id: XXXXXXXXXXXXX
+test_aws_secret_access_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 test_aws_default_region: us-east-1
-prod_aws_access_key_id: AKIAY5EQ5CISQBCDJC6K
-prod_aws_secret_access_key: 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
+prod_aws_access_key_id: XXXXXXXXXXXXX
+prod_aws_secret_access_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 prod_aws_default_region: us-east-1
 ```
 
 | Name | Description |
 |------|-------------|
-| \<env\>_aws_access_key_id | |
-| \<env\>_aws_secret_access_key | |
-| \<env\>_aws_default_region | |
+| \<env\>_aws_access_key_id | AWS Access Key ID|
+| \<env\>_aws_secret_access_key | AWS Secret Access Key |
+| \<env\>_aws_default_region | AWS Default Region |
 
-5. Run ansible playbook ```iac-boot.yml``` for each AWS account. for e.g.
+5.  Create a ansible-vault file ```aws-deploy-secrets.yml``` using the password in ```.vault_pass``` file. Add credentials for ```TerraformUser``` created by ```iac-boot.yml``` to this file. This file is used by ```iac-deploy.yml```, ```iac-plan.yml```, and ```iac-destroy.yml``` to authenticate against AWS org account and then do a assume role against target account to manage resources. 
+
+The file has following structure:
+
+```
+org_aws_access_key_id: AKIAY5BD5CISQBCDJC6G
+org_aws_secret_access_key: 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
+org_aws_default_region: us-east-1
+```
+
+6. For each AWS account, create a folder under ```roles/boot-tf-backend/files```. Name of the folder must be same as what is defined in the ```inventory.yml``` file.
+
+7. Copy ```main.tf``` and ```variables.tf``` file from ```org``` folder to this new folder.
+
+```console
+$ cd roles/boot-tf-backend/files
+$ mkdir prod
+$ cd prod
+$ cp ../org/main.tf .
+$ cp ../org/variables.tf .
+```
+
+8. Run ansible playbook ```iac-boot.yml``` for each AWS account. for e.g.
 
 ```console
 $ ansible-playbook -l org iam-boot.yml
@@ -160,15 +182,7 @@ Above playbook execution does the following:
 - For the ```org``` account it creates a user ```TerraformUser```. This account has access only to terraform S3 backend, and it has ability to assume role against target account. Credentials for this users are saved in ```org_user_cred_file``` as defined in all.yml group_vars file.
 - Creates a role ```TerraformRole```. Terraform uses this role to deploy infrastructure. This role needs to have appropriate permission to create AWS resources.
 
-6. Create a ansible-vault file ```aws-deploysecrets.yml```. This file is used by terraform deploy playbooks to deploy AWS infrastructure.
-
-The file has following structure:
-
-```
-org_aws_access_key_id: AKIAY5BD5CISQBCDJC6G
-org_aws_secret_access_key: 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
-org_aws_default_region: us-east-1
-```
+9. Create a ansible-vault file ```aws-deploy-secrets.yml```. This file is used by terraform deploy playbooks to deploy AWS infrastructure.
 
 
 ## Copyright
