@@ -5,7 +5,7 @@ Dalang is an Infrastructure as a Code (IaC) automation pipeline. It is built usi
 ## Installation/Build
 
 1. Clone this git repository
-```console
+```bash
 $ git clone https://github.com/dbsentry/dalang.git
 ```
 2. Install required modules using python/pip
@@ -20,7 +20,69 @@ $ . env/bin/activate
 
 ## Usage
 
-The projects comprise of following important ansible playbooks:
+1. Start with defining your AWS accounts in the ```inventory.yml``` file.
+
+```
+---
+all:
+  hosts:
+    dbsdev:
+  children:
+    org:
+      hosts:
+        dbsorg:
+    dev:
+      hosts:
+        dbsdev:
+    test:
+      hosts:
+        dbstest:
+    prod:
+      hosts:
+        dbsprod:
+```
+
+We recommend keeping the ```org``` groupname as is. It is also your root AWS account (AWS Organization Account). The groupnames in the inventory files are used to identify with the AWS accounts. New groups can be added or existing groups can be removed. It is important that the above syntax is followed.
+
+2. Modify all.yml group_vars file
+```
+---
+all_vars:
+    tfstate_namespace: dbs
+    tfstate_stage: org
+    tfstate_name: terraform
+    tfuser: TerraformUser
+    tfrole: TerraformRole
+    tfpolicy: TerraformPolicy
+    tfuserpolicy: TerraformUserAccess
+    org_account_id: 111111111111
+    org_account_name: org
+    org_user_cred_file: /tmp/tfuser.cred
+```
+| Name | Description |
+|------|-------------|
+| tfstate_namespace | |
+| tfstate_stage | |
+| tfstate_name | |
+| tfuser | |
+| tfrole | |
+| tfpolicy | |
+| tfuserpolicy | |
+| org_account_id | |
+| org_account_name | |
+| org_user_cred_file | |
+```
+
+3. Modify each AWS environment's group_vars file. Please note that Ansible passes parameters defined in these files to terraform, as per terraform template definition. So, for each terraform stack you define that requires variables, that needs to be defined here.
+
+```
+| Name | Description |
+|------|-------------|
+
+```
+
+
+The projects consist of following ansible playbooks:
 
 | Name | Description |
 |------|-------------|
@@ -29,6 +91,7 @@ The projects comprise of following important ansible playbooks:
 | iac-plan.yml |     |
 | iac-deploy.yml |   |
 | iac-destroy.yml |  |
+
 
 ## Copyright
 
