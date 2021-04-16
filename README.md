@@ -61,7 +61,7 @@ This project is maintained and funded by [DBSentry Corp.][website]. Like it? Dro
 
 I am an independent consultant based in Irving, TX and ❤️  [Open Source Software][dbsentry_github_projects].
 
-We offer [paid support][commercial_support] on all of our projects.
+We offer paid support on all of our projects.
 
 Check out [our other projects][dbsentry_github_projects], or [hire us][feedback] to help with your cloud strategy and implementation.
 
