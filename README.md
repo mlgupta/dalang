@@ -146,11 +146,29 @@ prod_aws_default_region: us-east-1
 | iac-deploy.yml |   |
 | iac-destroy.yml |  |
 
-6. Run ansible playbook ```iac-boot.yml``` for each AWS account.
+6. Run ansible playbook ```iac-boot.yml``` for each AWS account. for e.g.
 
 ```console
 $ ansible-playbook -l org iam-boot.yml
+$ ansible-playbook -l dev iam-boot.yml
 ```
+
+Above playbook execution does the following:
+- Authenticates against the specified AWS account
+- Creates a terraform S3 backend along with dynamodb table
+- For the ```org``` account it creates a user ```TerraformUser```. This account has access only to terraform S3 backend, and it has ability to assume role against target account. Credentials for this users are saved in ```org_user_cred_file``` as defined in all.yml group_vars file.
+- Creates a role ```TerraformRole```. Terraform uses this role to deploy infrastructure. This role needs to have appropriate permission to create AWS resources.
+
+7. Create a ansible-vault file ```aws-deploysecrets.yml```. This file is used by terraform deploy playbooks to deploy AWS infrastructure.
+
+The file has following structure:
+
+```
+org_aws_access_key_id: AKIAY5BD5CISQBCDJC6G
+org_aws_secret_access_key: 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
+org_aws_default_region: us-east-1
+```
+
 
 ## Copyright
 
