@@ -1,6 +1,6 @@
 # dalang
 
-Dalang is an Infrastructure as a Code (IaC) automation pipeline. It is built using ansible and terraform.
+Dalang is an Infrastructure as a Code (IaC) automation pipeline. It is built using ansible and terraform. Dalang automates infrastructure deployment in your multi account AWS environment. It can easily be plumbed into any CI/CD pipeline such as AWS Codepipeline, Ansible Tower/AWS, or Github Actions.
 
 ## Installation/Build
 
@@ -17,6 +17,18 @@ $ . env/bin/activate
 (env) $ pip install -r requirements.txt
 ```
 3. Download and install terraform binary. I prefer to copy it under env/bin.
+
+## Usage
+
+The projects comprise of following important ansible playbooks:
+
+| Name | Description |
+|------|-------------|
+| iac-boot.yml |     |
+| iac-boot-destroy.yml | |
+| iac-plan.yml |     |
+| iac-deploy.yml |   |
+| iac-destroy.yml |  |
 
 ## Copyright
 
