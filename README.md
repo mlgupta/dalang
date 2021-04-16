@@ -24,11 +24,11 @@ The projects comes with following ansible playbooks:
 
 | Name | Description |
 |------|-------------|
-| iac-boot.yml | This playbook creates S3 backend, users, and roles that is used for the AWS resource deployment. Although this playbook can run against all environment, we recommend running it one by one against each AWS environment using ```ansible-playbook -l``` flag. |
-| iac-boot-destroy.yml | This playbook deletes roles and S3 backend for the target AWS account. Before running this playbook, make sure that all the terraform resources created and stored on this backend are deleted. Otherwise, they would remain in AWS dangling. |
-| iac-plan.yml | This playbook runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and generates terraform plan on stdout. If multiple stacks are specified using ```--tags``` then they are sorted as list and then. |
-| iac-deploy.yml | This playbook runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and creates AWS resources. If multiple stacks are specified using ```--tags``` then they are sorted as list and then applied individually one-by-one. In order to keep the blast radius small, we recommend specifying stack name to be applied using ```--tags```. |
-| iac-destroy.yml | This playbook runs ```terraform destroy``` against each stack specified using ```--tags``` |
+| iac-boot.yml | Creates S3 backend, users, and roles that is used for the AWS resource deployment. Although this playbook can run against all environment, we recommend running it one by one against each AWS environment using ```ansible-playbook -l``` flag. |
+| iac-boot-destroy.yml | Deletes roles and S3 backend for the target AWS account. Before running this playbook, make sure that all the terraform resources created and stored on this backend are deleted. Otherwise, they would remain in AWS dangling. |
+| iac-plan.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and generates terraform plan on stdout. If multiple stacks are specified using ```--tags``` then they are sorted as list and then. |
+| iac-deploy.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and creates AWS resources. If multiple stacks are specified using ```--tags``` then they are sorted as list and then applied individually one-by-one. In order to keep the blast radius small, we recommend specifying stack name to be applied using ```--tags```. |
+| iac-destroy.yml | Runs ```terraform destroy``` against each stack specified using ```--tags``` |
 
 
 1. Start with defining your AWS accounts in the ```inventory.yml``` file.
