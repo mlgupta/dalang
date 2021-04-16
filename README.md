@@ -1,6 +1,6 @@
 # dalang
 
-Dalang is an Infrastructure as a Code (IaC) automation pipeline. It is built using ansible and terraform. Dalang automates infrastructure deployment in your multi account AWS environment. It can easily be plumbed into any CI/CD pipeline such as AWS Codepipeline, Ansible Tower/AWS, or Github Actions.
+Dalang is a collection of Ansible Playbooks developed for Infrastructure as a Code (IaC) automation. It automates infrastructure deployment in your multi-account AWS environment. Dalang can easily be added to any CI/CD pipeline such as AWS Codepipeline, Ansible Tower/AWS, or Github Actions.
 
 ## Installation/Build
 
@@ -20,14 +20,14 @@ $ . env/bin/activate
 
 ## Usage
 
-The projects comes with following ansible playbooks:
+The projects come with the following Ansible playbooks:
 
 | Name | Description |
 |------|-------------|
-| iac-boot.yml | Creates S3 backend, users, and roles that is used for the AWS resource deployment. Although this playbook can run against all environment, we recommend running it one by one against each AWS environment using ```ansible-playbook -l``` flag. |
-| iac-boot-destroy.yml | Deletes roles and S3 backend for the target AWS account. Before running this playbook, make sure that all the terraform resources created and stored on this backend are deleted. Otherwise, they would remain in AWS dangling. |
-| iac-plan.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and generates terraform plan on stdout. If multiple stacks are specified using ```--tags``` then they are sorted as list and then. |
-| iac-deploy.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and creates AWS resources. If multiple stacks are specified using ```--tags``` then they are sorted as list and then applied individually one-by-one. In order to keep the blast radius small, we recommend specifying stack name to be applied using ```--tags```. |
+| iac-boot.yml | Creates S3 backend, users, and roles used for the AWS resource deployment. Although this playbook can run against all environments at once, we recommend running it one by one against each AWS environment using ```ansible-playbook -l``` flag. |
+| iac-boot-destroy.yml | Deletes roles and S3 backend for the target AWS account. Before running this playbook, ensure that all the terraform resources created and stored on this backend were already deleted. Otherwise, they would remain in the AWS account. |
+| iac-plan.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and generates terraform plan on stdout. If multiple stacks are specified using ```--tags```, they are sorted. |
+| iac-deploy.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and creates AWS resources. If multiple stacks are specified using ```--tags``` then they are sorted and then applied individually. To keep the blast radius small, we recommend specifying the stack using ```--tags```. |
 | iac-destroy.yml | Runs ```terraform destroy``` against each stack specified using ```--tags``` |
 
 
@@ -53,7 +53,7 @@ all:
         dbsprod:
 ```
 
-We recommend keeping the ```org``` groupname as is. It is also your root AWS account (AWS Organization Account). The groupnames in the inventory files are used to identify with the AWS accounts. New groups can be added or existing groups can be removed. It is important that the above syntax is followed.
+We recommend keeping the ```org``` group name as is. It is also your root AWS account (AWS Organization Account). The group names in the inventory files identify AWS accounts. New groups can be added or existing groups can be removed from the file as per your need. The above syntax must be followed.
 
 2. Modify all.yml group_vars file
 ```
@@ -73,11 +73,11 @@ all_vars:
 
 | Name | Description |
 |------|-------------|
-| tfstate_namespace | S3 backend gets created in a form \<tfstate_namespace\>-\<tfstate_stage\>-\<tfstate_name\>-state. Typically, this can be set to abbreviation for your organization.|
+| tfstate_namespace | S3 backend gets created in a form \<tfstate_namespace\>-\<tfstate_stage\>-\<tfstate_name\>-state. Typically, this can be set to the abbreviation for your organization.|
 | tfstate_stage | Environment AWS account corresponds to. for e.g. dev, test, etc|
 | tfstate_name | Set it to "terraform"|
-| tfuser | This is the user gets created in the "org" account. ```iac-deploy.yum```, and other playbooks use this user to authenticate against AWS, and then perform assume role for the target AWS environment.|
-| tfrole | This is the role assumed by ```iac-deploy.yml``` playbook to deploy resources in the target AWS account. |
+| tfuser | IAM User in the ```org``` account used by ```iac-deploy.yml``` to authenticate against AWS, and then perform assume role for the target AWS environment.|
+| tfrole | Role assumed by ```iac-deploy.yml``` playbook to deploy resources in the target AWS account. |
 | tfpolicy | Name of the AWS IAM policy created in the target AWS account. This policy is attached to the tfrole. |
 | tfuserpolicy | Name of the AWS IAM policy in the "org" account. It has minimal permission that allows this user to perform assume role against the target AWS environment. |
 | org_account_id | AWS account ID for the "org" account|
@@ -85,7 +85,7 @@ all_vars:
 | org_user_cred_file | Credential file for tfuser created by ```iac-boot.yml```. Content of this file must be entered into ansible-vault file ```aws-deploy-secrets.yml```. This file has the same syntax as ```aws-secrets.yml```.|
 
 
-3. Modify each AWS environment's group_vars file. Please note that Ansible passes parameters defined in these files to terraform, as per terraform template definition. So, for each terraform stack you define that requires variables, that needs to be defined here.
+3. Modify each AWS environment's group_vars file. Please note that Ansible passes parameters defined in these files to terraform, as per terraform template definition. So, for each Terraform stack, you define that requires variables, that need to be defined here.
 
 ```
 group_vars:
