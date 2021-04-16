@@ -111,7 +111,9 @@ group_vars:
 
 Above ```vpc_vars``` is defined as dict. Ansible passes these to terraform stack ```0100-vpc```.
 
-4. Create a ansible-vault file ```aws-secrets.yml``` place its password in ```.vault_pass``` file. This file has following structure:
+4. Create a ansible-vault file ```aws-secrets.yml``` place its password in ```.vault_pass``` file. This file is used by dalang boot process that sets up terraform S3 backend for each AWS account, and creats a ```TerraformUser``` user in ```org``` account and ```TerraformRole``` in each AWS account. The accounts defined in this file have elevated privilges that allows them to create users/roles and assign and define policies for the roles.
+
+The file has following structure:
 
 ```
 org_aws_access_key_id: AKIAY5EQ5CISQBCDJC6K
@@ -134,7 +136,7 @@ prod_aws_default_region: us-east-1
 | \<env\>_aws_secret_access_key | |
 | \<env\>_aws_default_region | |
 
-The projects consist of following ansible playbooks:
+5. The projects consist of following ansible playbooks:
 
 | Name | Description |
 |------|-------------|
@@ -144,6 +146,11 @@ The projects consist of following ansible playbooks:
 | iac-deploy.yml |   |
 | iac-destroy.yml |  |
 
+6. Run ansible playbook ```iac-boot.yml``` for each AWS account.
+
+```console
+$ ansible-playbook -l org iam-boot.yml
+```
 
 ## Copyright
 
