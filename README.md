@@ -177,12 +177,10 @@ $ ansible-playbook -l dev iam-boot.yml
 ```
 
 Above playbook execution does the following:
-- Authenticates against the specified AWS account
-- Creates a terraform S3 backend along with dynamodb table
+- Authenticates against AWS account specified using ```-l```
+- Creates a encrypted terraform S3 backend and dynamodb table using fantastic terraform module [cloudposse/terraform-aws-tfstate-backend](https://github.com/cloudposse/terraform-aws-tfstate-backend)
 - For the ```org``` account it creates a user ```TerraformUser```. This account has access only to terraform S3 backend, and it has ability to assume role against target account. Credentials for this users are saved in ```org_user_cred_file``` as defined in all.yml group_vars file.
 - Creates a role ```TerraformRole```. Terraform uses this role to deploy infrastructure. This role needs to have appropriate permission to create AWS resources.
-
-9. Create a ansible-vault file ```aws-deploy-secrets.yml```. This file is used by terraform deploy playbooks to deploy AWS infrastructure.
 
 
 ## Copyright
