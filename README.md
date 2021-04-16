@@ -130,9 +130,9 @@ prod_aws_default_region: us-east-1
 
 | Name | Description |
 |------|-------------|
-| <env>_aws_access_key_id | |
-| <env>_aws_secret_access_key | |
-| <env>_aws_default_region | |
+| \<env\>_aws_access_key_id | |
+| \<env\>_aws_secret_access_key | |
+| \<env\>_aws_default_region | |
 
 The projects consist of following ansible playbooks:
 
