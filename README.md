@@ -111,7 +111,28 @@ group_vars:
 
 Above ```vpc_vars``` is defined as dict. Ansible passes these to terraform stack ```0100-vpc```.
 
+4. Create a ansible-vault file ```aws-secrets.yml``` place its password in ```.vault_pass``` file. This file has following structure:
 
+```
+org_aws_access_key_id: AKIAY5EQ5CISQBCDJC6K
+org_aws_secret_access_key: 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
+org_aws_default_region: us-east-1
+dev_aws_access_key_id: AKIAY5EQ5CISQBCDJC6K
+dev_aws_secret_access_key: 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
+dev_aws_default_region: us-east-1
+test_aws_access_key_id: AKIAY5EQ5CISQBCDJC6K
+test_aws_secret_access_key: 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
+test_aws_default_region: us-east-1
+prod_aws_access_key_id: AKIAY5EQ5CISQBCDJC6K
+prod_aws_secret_access_key: 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
+prod_aws_default_region: us-east-1
+```
+
+| Name | Description |
+|------|-------------|
+| <env>_aws_access_key_id | |
+| <env>_aws_secret_access_key | |
+| <env>_aws_default_region | |
 
 The projects consist of following ansible playbooks:
 
