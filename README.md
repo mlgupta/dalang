@@ -5,7 +5,7 @@ Dalang is an Infrastructure as a Code (IaC) automation pipeline. It is built usi
 ## Installation/Build
 
 1. Clone this git repository
-```bash
+```console
 $ git clone https://github.com/dbsentry/dalang.git
 ```
 2. Install required modules using python/pip
@@ -59,6 +59,7 @@ all_vars:
     org_account_name: org
     org_user_cred_file: /tmp/tfuser.cred
 ```
+
 | Name | Description |
 |------|-------------|
 | tfstate_namespace | |
@@ -71,15 +72,45 @@ all_vars:
 | org_account_id | |
 | org_account_name | |
 | org_user_cred_file | |
-```
+
 
 3. Modify each AWS environment's group_vars file. Please note that Ansible passes parameters defined in these files to terraform, as per terraform template definition. So, for each terraform stack you define that requires variables, that needs to be defined here.
 
 ```
+group_vars:
+    account_id: 111111111111
+    account_name: org
+    default_tags:
+        owner: ""
+        userid: ""
+        company: ""
+        organization: ""
+####################################################
+    vpc_vars:
+        azs:
+            - us-east-1a
+            - us-east-1b
+            - us-east-1c
+        vpc_cidr: "10.10.0.0/16"
+        public_subnet_cidr:
+            - 10.10.1.0/24
+            - 10.10.4.0/24
+            - 10.10.7.0/24
+        private_subnet_cidr:
+            - 10.10.3.0/24
+            - 10.10.6.0/24
+            - 10.10.9.0/24
+####################################################
+```
+
 | Name | Description |
 |------|-------------|
+| account_id | |
+| account_name | |
+| default_tags | |
 
-```
+Above ```vpc_vars``` is defined as dict. Ansible passes these to terraform stack ```0100-vpc```.
+
 
 
 The projects consist of following ansible playbooks:
