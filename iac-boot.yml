@@ -1,11 +1,22 @@
-#########################################################################################
+#############################################################################
+#                       Confidentiality Information                         #
+#                                                                           #
+# This module is the confidential and proprietary information of            #
+# DBSentry Corp.; it is not to be copied, reproduced, or transmitted in any #
+# form, by any means, in whole or in part, nor is it to be used for any     #
+# purpose other than that for which it is expressly provided without the    #
+# written permission of DBSentry Corp.                                      #
+#                                                                           #
+# Copyright (c) 2020-2021 DBSentry Corp.  All Rights Reserved.              #
+#                                                                           #
+#############################################################################
 # iac-bootstrap.yml
 #   Playbook to bootstrap IaC setup using Ansible and Terraform. 
 #    - Create encrypted S3 backend and Dynamodb table
 #    - Move tfstate to S3
 #    - Create TerraformUser for Org account
 #    - Create terraform role for each target environment
-#########################################################################################
+#############################################################################
 - name: Bootstrap Terraform AWS Backend and setup environment
   hosts: all
   connection: local
