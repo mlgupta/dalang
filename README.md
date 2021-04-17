@@ -25,9 +25,42 @@ Above playbooks can be categorized into two sets:
 ```iac-boot.yml``` creates S3 backend, create an IAM user in the ```org``` account, and creates ```TerraformRole``` in each AWS account. ```TerraformRole``` is used by operations playbook.
 
 ```iac-boot.yml``` accomplished the above tasks using the following three ansible roles:
-- **boot-tf-backend**: Creates S3 backend using cloudposse/terraform-aws-tfstate-backend module. It executes terraform templates under the ```files/\<AWS Account\>``` folder
-- **boot-tf-user**:
-- **boot-tf-role**:
+- **boot-tf-backend**: Creates S3 backend using cloudposse/terraform-aws-tfstate-backend module. It executes terraform templates under the ```files/<AWS Account>``` folder. So, create as many folders as the AWS Account you have and copy ```main.tf``` and ```variables.tf``` files from the ```org``` folder to the folders you create.
+- **boot-tf-user**: Creates ```TerraformUser``` in the ```org``` account. This user is granted assume role privileges, which is used by Operations playbooks to assume role to the target AWS account.
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole",
+        "Effect": "Allow",
+        "Resource": "arn:aws:iam::*:role/${local.all_vars_map["tfrole"]}"
+      }
+    ]
+  }
+```
+- **boot-tf-role**: Creates ```TerraformRole``` in each AWS account. It creates a cross-account trust relationship from the ```org``` account to the AWS account against which this playbook is executed. This role is assumed by Operations playbooks to manage AWS resources. So, this role must have enough privileges to accomplish the resource management task. It executes terraform templates under the ```files/<AWS Account>``` folder. So, create as many folders as the AWS Account you have and copy ```main.tf```, ```variables.tf```, and ```backend.tf``` from the ```org``` folder to the folders you create. Modify the policy for each account per your requirement. By default, it includes the following policy:
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": [
+          "iam:*",
+          "s3:*",
+          "ec2:*",
+          "logs:*",
+          "kms:*",
+          "dynamodb:*"
+        ],
+        "Effect": "Allow",
+        "Resource": "*"
+      }
+    ]
+  }
+``` 
+
+So, whenever you have a need to modify the ```TerraformRole```, modify the appropriate ```main.tf``` file and re-run ```iam-boot.yml``` playbook.
 
 ## Installation/Build
 
