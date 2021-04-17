@@ -16,6 +16,19 @@ The projects come with the following Ansible playbooks:
 | iac-deploy.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and creates AWS resources. If multiple stacks are specified using ```--tags``` then they are sorted and then applied individually. To keep the blast radius small, we recommend specifying the stack using ```--tags```. |
 | iac-destroy.yml | Runs ```terraform destroy``` against each stack specified using ```--tags``` |
 
+Above playbooks can be categorized into two sets:
+- Boot
+- Operations
+
+```iac-boot.yml``` and ```iac-boot-destroy.yml``` are boot playbooks. The rest are Operations playbooks.
+
+```iac-boot.yml``` creates S3 backend, create an IAM user in the ```org``` account, and creates ```TerraformRole``` in each AWS account. ```TerraformRole``` is used by operations playbook.
+
+```iac-boot.yml``` accomplished the above tasks using the following three ansible roles:
+- **boot-tf-backend**: Creates S3 backend using cloudposse/terraform-aws-tfstate-backend module. It executes terraform templates under the ```files\\<AWS Account\>``` folder
+- **boot-tf-user**:
+- **boot-tf-role**:
+
 ## Installation/Build
 
 1. Clone this git repository
