@@ -25,7 +25,7 @@ Above playbooks can be categorized into two sets:
 ```iac-boot.yml``` creates S3 backend, create an IAM user in the ```org``` account, and creates ```TerraformRole``` in each AWS account. ```TerraformRole``` is used by operations playbook.
 
 ```iac-boot.yml``` accomplished the above tasks using the following three ansible roles:
-- **boot-tf-backend**: Creates S3 backend using cloudposse/terraform-aws-tfstate-backend module. It executes terraform templates under the ```files\\<AWS Account\>``` folder
+- **boot-tf-backend**: Creates S3 backend using cloudposse/terraform-aws-tfstate-backend module. It executes terraform templates under the ```files/\<AWS Account\>``` folder
 - **boot-tf-user**:
 - **boot-tf-role**:
 
