@@ -62,6 +62,39 @@ Above playbooks can be categorized into two sets:
 
 So, whenever you have a need to modify the ```TerraformRole```, modify the appropriate ```main.tf``` file and re-run ```iam-boot.yml``` playbook.
 
+Operations playbooks runs terraform templates stored under ```terraform``` folder, which has following structure:
+```
+terraform/
+├── dev
+│   ├── 0100-vpc
+│   │   ├── backend.tf
+│   │   ├── main.tf
+│   │   └── variables.tf
+│   ├── 0200-s3
+│   │   ├── backend.tf
+│   │   ├── main.tf
+│   │   └── variables.tf
+│   └── 1100-rds-mysql
+│       ├── backend.tf
+│       ├── main.tf
+│       └── variables.tf
+└── org
+    ├── 0100-vpc
+    │   ├── backend.tf
+    │   ├── main.tf
+    │   └── variables.tf
+    ├── 0200-s3
+    │   ├── backend.tf
+    │   ├── main.tf
+    │   └── variables.tf
+    └── 1100-rds-mysql
+        ├── backend.tf
+        ├── main.tf
+        └── variables.tf
+```
+
+As you can see above, you have a separate folder for each AWS account under the ```terraform``` folder. Each folder under the AWS account is prefixed with a number, and corresponds to a terraform stack. You specify teh stack using the ```--tags``` to ```ansible-playbook```. If multiple stacks are specified, then the playbook sorts them and runs terraform against each one of them sequentially. The number prefix ensures that stack dependency is honors (for e.g. 0100-vpc gets executed before 1100-rds-mysql does). You can add folders as per your requirements. We recommened using terraform modules, and keep modules in the separate git repository. You can use those modules here. We also, recommend making the whole ```terraform``` folder as a git submodule to keep separation.
+
 ## Installation/Build
 
 1. Clone this git repository
