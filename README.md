@@ -6,6 +6,15 @@ Dalang is a collection of Ansible Playbooks developed for Infrastructure as a Co
 
 ![Dalang Architecture](https://keyper.dbsentry.com/media/dalang.png)  
 
+The projects come with the following Ansible playbooks:
+
+| Name | Description |
+|------|-------------|
+| iac-boot.yml | Creates S3 backend, users, and roles used for the AWS resource deployment. Although this playbook can run against all environments at once, we recommend running it one by one against each AWS environment using ```ansible-playbook -l``` flag. |
+| iac-boot-destroy.yml | Deletes roles and S3 backend for the target AWS account. Before running this playbook, ensure that all the terraform resources created and stored on this backend were already deleted. Otherwise, they would remain in the AWS account. |
+| iac-plan.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and generates terraform plan on stdout. If multiple stacks are specified using ```--tags```, they are sorted. |
+| iac-deploy.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and creates AWS resources. If multiple stacks are specified using ```--tags``` then they are sorted and then applied individually. To keep the blast radius small, we recommend specifying the stack using ```--tags```. |
+| iac-destroy.yml | Runs ```terraform destroy``` against each stack specified using ```--tags``` |
 
 ## Installation/Build
 
@@ -24,17 +33,6 @@ $ . env/bin/activate
 3. Download and install terraform binary. I prefer to copy it under env/bin.
 
 ## Usage
-
-The projects come with the following Ansible playbooks:
-
-| Name | Description |
-|------|-------------|
-| iac-boot.yml | Creates S3 backend, users, and roles used for the AWS resource deployment. Although this playbook can run against all environments at once, we recommend running it one by one against each AWS environment using ```ansible-playbook -l``` flag. |
-| iac-boot-destroy.yml | Deletes roles and S3 backend for the target AWS account. Before running this playbook, ensure that all the terraform resources created and stored on this backend were already deleted. Otherwise, they would remain in the AWS account. |
-| iac-plan.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and generates terraform plan on stdout. If multiple stacks are specified using ```--tags```, they are sorted. |
-| iac-deploy.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and creates AWS resources. If multiple stacks are specified using ```--tags``` then they are sorted and then applied individually. To keep the blast radius small, we recommend specifying the stack using ```--tags```. |
-| iac-destroy.yml | Runs ```terraform destroy``` against each stack specified using ```--tags``` |
-
 
 1. Start with defining your AWS accounts in the ```inventory.yml``` file.
 
