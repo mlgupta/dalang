@@ -2,6 +2,99 @@
 
 Dalang is a collection of Ansible Playbooks developed for Infrastructure as a Code (IaC) automation. It automates infrastructure deployment in your multi-account AWS environment. Dalang can easily be added to any CI/CD pipeline such as AWS Codepipeline, Ansible Tower/AWS, or Github Actions.
 
+## Architecture
+
+![Dalang Architecture](https://keyper.dbsentry.com/media/dalang.png)  
+
+The projects come with the following Ansible playbooks:
+
+| Name | Description |
+|------|-------------|
+| iac-boot.yml | Creates S3 backend, users, and roles used for the AWS resource deployment. Although this playbook can run against all environments at once, we recommend running it one by one against each AWS environment using ```ansible-playbook -l``` flag. |
+| iac-boot-destroy.yml | Deletes roles and S3 backend for the target AWS account. Before running this playbook, ensure that all the terraform resources created and stored on this backend were already deleted. Otherwise, they would remain in the AWS account. |
+| iac-plan.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and generates terraform plan on stdout. If multiple stacks are specified using ```--tags```, they are sorted. |
+| iac-deploy.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and creates AWS resources. If multiple stacks are specified using ```--tags``` then they are sorted and then applied individually. To keep the blast radius small, we recommend specifying the stack using ```--tags```. |
+| iac-destroy.yml | Runs ```terraform destroy``` against each stack specified using ```--tags``` |
+
+Above playbooks can be categorized into two sets:
+- Boot
+- Operations
+
+```iac-boot.yml``` and ```iac-boot-destroy.yml``` are boot playbooks. The rest are Operations playbooks.
+
+```iac-boot.yml``` creates S3 backend, create an IAM user in the ```org``` account, and creates ```TerraformRole``` in each AWS account. ```TerraformRole``` is used by operations playbook.
+
+```iac-boot.yml``` accomplished the above tasks using the following three ansible roles:
+- **boot-tf-backend**: Creates S3 backend using cloudposse/terraform-aws-tfstate-backend module. It executes terraform templates under the ```files/<AWS Account>``` folder. So, create as many folders as the AWS Account you have and copy ```main.tf``` and ```variables.tf``` files from the ```org``` folder to the folders you create.
+- **boot-tf-user**: Creates ```TerraformUser``` in the ```org``` account. This user is granted assume role privileges, which is used by Operations playbooks to assume role to the target AWS account.
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole",
+        "Effect": "Allow",
+        "Resource": "arn:aws:iam::*:role/${local.all_vars_map["tfrole"]}"
+      }
+    ]
+  }
+```
+- **boot-tf-role**: Creates ```TerraformRole``` in each AWS account. It creates a cross-account trust relationship from the ```org``` account to the AWS account against which this playbook is executed. This role is assumed by Operations playbooks to manage AWS resources. So, this role must have enough privileges to accomplish the resource management task. It executes terraform templates under the ```files/<AWS Account>``` folder. So, create as many folders as the AWS Account you have and copy ```main.tf```, ```variables.tf```, and ```backend.tf``` from the ```org``` folder to the folders you create. Modify the policy for each account per your requirement. By default, it includes the following policy:
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": [
+          "iam:*",
+          "s3:*",
+          "ec2:*",
+          "logs:*",
+          "kms:*",
+          "dynamodb:*"
+        ],
+        "Effect": "Allow",
+        "Resource": "*"
+      }
+    ]
+  }
+``` 
+
+So, whenever you have a need to modify the ```TerraformRole```, modify the appropriate ```main.tf``` file and re-run ```iam-boot.yml``` playbook.
+
+Operations playbooks runs terraform templates stored under ```terraform``` folder, which has following structure:
+```
+terraform/
+├── dev
+│   ├── 0100-vpc
+│   │   ├── backend.tf
+│   │   ├── main.tf
+│   │   └── variables.tf
+│   ├── 0200-s3
+│   │   ├── backend.tf
+│   │   ├── main.tf
+│   │   └── variables.tf
+│   └── 1100-rds-mysql
+│       ├── backend.tf
+│       ├── main.tf
+│       └── variables.tf
+└── org
+    ├── 0100-vpc
+    │   ├── backend.tf
+    │   ├── main.tf
+    │   └── variables.tf
+    ├── 0200-s3
+    │   ├── backend.tf
+    │   ├── main.tf
+    │   └── variables.tf
+    └── 1100-rds-mysql
+        ├── backend.tf
+        ├── main.tf
+        └── variables.tf
+```
+
+As you can see above, you have a separate folder for each AWS account under the ```terraform``` folder. Each folder under the AWS account is prefixed with a number, and corresponds to a terraform stack. You specify teh stack using the ```--tags``` to ```ansible-playbook```. If multiple stacks are specified, then the playbook sorts them and runs terraform against each one of them sequentially. The number prefix ensures that stack dependency is honors (for e.g. 0100-vpc gets executed before 1100-rds-mysql does). You can add folders as per your requirements. We recommened using terraform modules, and keep modules in the separate git repository. You can use those modules here. We also, recommend making the whole ```terraform``` folder as a git submodule to keep separation.
+
 ## Installation/Build
 
 1. Clone this git repository
@@ -19,17 +112,6 @@ $ . env/bin/activate
 3. Download and install terraform binary. I prefer to copy it under env/bin.
 
 ## Usage
-
-The projects come with the following Ansible playbooks:
-
-| Name | Description |
-|------|-------------|
-| iac-boot.yml | Creates S3 backend, users, and roles used for the AWS resource deployment. Although this playbook can run against all environments at once, we recommend running it one by one against each AWS environment using ```ansible-playbook -l``` flag. |
-| iac-boot-destroy.yml | Deletes roles and S3 backend for the target AWS account. Before running this playbook, ensure that all the terraform resources created and stored on this backend were already deleted. Otherwise, they would remain in the AWS account. |
-| iac-plan.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and generates terraform plan on stdout. If multiple stacks are specified using ```--tags```, they are sorted. |
-| iac-deploy.yml | Runs against each terraform stack (defined under ```terraform/\<env\>/\<stack\>```) and creates AWS resources. If multiple stacks are specified using ```--tags``` then they are sorted and then applied individually. To keep the blast radius small, we recommend specifying the stack using ```--tags```. |
-| iac-destroy.yml | Runs ```terraform destroy``` against each stack specified using ```--tags``` |
-
 
 1. Start with defining your AWS accounts in the ```inventory.yml``` file.
 
@@ -152,8 +234,8 @@ prod_aws_default_region: us-east-1
 The file has the following structure:
 
 ```
-org_aws_access_key_id: AKIAY5BD5CISQBCDJC6G
-org_aws_secret_access_key: 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
+org_aws_access_key_id: XXXXXXXXXXXXX
+org_aws_secret_access_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 org_aws_default_region: us-east-1
 ```
 
@@ -181,6 +263,41 @@ Above playbook execution does the following:
 - Creates a encrypted terraform S3 backend and dynamodb table using fantastic terraform module [cloudposse/terraform-aws-tfstate-backend](https://github.com/cloudposse/terraform-aws-tfstate-backend)
 - It creates a user ```TerraformUser``` for the ```org``` account. This account has access only to terraform S3 backend, and it can assume a role against the target account. Credential for this user is generated by ```iac-boot.yml``` in ```org_user_cred_file``` as defined in all.yml.
 - Creates a role ```TerraformRole```. Terraform uses this role to deploy infrastructure. This role needs to have appropriate permission to create AWS resources. Default permissions defined are minimal, so the ```main.tf``` file under ```boot-tf-role``` role must be modified for each environment and ```iac-boot.yml``` playbook run so that appropriate permission is granted to ```TerraformRole```.
+
+9. ```iac-plan.yml``` is run to generate terraform plan for a stack.
+```console
+$ ansible-playbook -l <environment> --tags <stack> ... --tags <stack> iac-plan.yml
+
+$ ansible-playbook -l dev --tags 0100-vpc iac-plan.yml
+```
+
+If multiple tags are specified, then the tags list is sorted and plan generated.
+
+If tags are not specified, then the terraform is generated for each stack under the environment.
+
+This playbook can be the first step of CI/CD pipeline (on AWS code pipeline, or AWS Tower). A manual confirmation step can be added for the subsequent action.
+
+10. ```iac-deploy.yml``` is run to deploy AWS resources for a stack using terraform.
+
+```console
+$ ansible-playbook -l <environment> --tags <stack> ... --tags <stack> iac-deploy.yml
+
+$ ansible-playbook -l dev --tags 0100-vpc iac-deploy.yml
+```
+
+If multiple tags are specified, then the tags list is sorted, and each stack is applied.
+
+If tags are not specified, then the terraform applies each stack sequentially under the environment after sorting.
+
+11. ```iac-destroy.yml``` is run to destroy AWS resources for a stack using terraform.
+
+```console
+$ ansible-playbook -l <environment> --tags <stack> ... --tags <stack> iac-destroy.yml
+
+$ ansible-playbook -l dev --tags 0100-vpc iac-destroy.yml
+```
+
+If multiple tags are specified, then the tags list is sorted in descending order, and each stack is destroyed. As this playbook destroys AWS resources, in order to ensure a small blast radius, its execution against an AWS account without tags is not permitted.
 
 ## Copyright
 
