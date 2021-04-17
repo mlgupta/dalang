@@ -234,8 +234,8 @@ prod_aws_default_region: us-east-1
 The file has the following structure:
 
 ```
-org_aws_access_key_id: AKIAY5BD5CISQBCDJC6G
-org_aws_secret_access_key: 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
+org_aws_access_key_id: XXXXXXXXXXXXX
+org_aws_secret_access_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 org_aws_default_region: us-east-1
 ```
 
