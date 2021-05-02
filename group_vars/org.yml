@@ -21,3 +21,9 @@ group_vars:
             - 10.10.3.0/24
             - 10.10.6.0/24
             - 10.10.9.0/24
+    rds_mysql_vars:
+        rds_db_name: demo
+        rds_db_username: admin
+        rds_vpc_exist: "false"
+
+

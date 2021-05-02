@@ -299,6 +299,15 @@ $ ansible-playbook -l dev --tags 0100-vpc iac-destroy.yml
 
 If multiple tags are specified, then the tags list is sorted in descending order, and each stack is destroyed. As this playbook destroys AWS resources, in order to ensure a small blast radius, its execution against an AWS account without tags is not permitted.
 
+## Dalang on Ansible Tower/AWS
+To Do
+
+## Dalang on AWS Codepipeline
+To Do
+
+## Dalang on Github Actions
+To Do
+
 ## Copyright
 
 Copyright © 2021 [DBSentry Corp.](https://keyper.dbsentry.com)
