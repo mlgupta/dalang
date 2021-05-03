@@ -1,14 +1,18 @@
 ---
 #############################################################################
-#                       Confidentiality Information                         #
-#                                                                           #
-# This module is the confidential and proprietary information of            #
-# DBSentry Corp.; it is not to be copied, reproduced, or transmitted in any #
-# form, by any means, in whole or in part, nor is it to be used for any     #
-# purpose other than that for which it is expressly provided without the    #
-# written permission of DBSentry Corp.                                      #
-#                                                                           #
 # Copyright (c) 2020-2021 DBSentry Corp.  All Rights Reserved.              #
+#                                                                           #
+# Licensed under the Apache License, Version 2.0 (the "License");           #
+# you may not use this file except in compliance with the License.          #
+# You may obtain a copy of the License at                                   #
+#                                                                           #
+#      http://www.apache.org/licenses/LICENSE-2.0                           #
+#                                                                           #
+# Unless required by applicable law or agreed to in writing, software       #
+# distributed under the License is distributed on an "AS IS" BASIS,         #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  #
+# See the License for the specific language governing permissions and       #
+# limitations under the License.                                            #
 #                                                                           #
 #############################################################################
 ## Create/Deletes terraform user for org environment
