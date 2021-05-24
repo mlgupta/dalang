@@ -38,7 +38,7 @@ resource "aws_iam_role" "tfrole" {
   name               = local.all_vars_map["tfrole"]
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 
-  tags = merge(local.group_vars_map["default_tags"], map("Name", local.all_vars_map["tfrole"]))
+  tags = merge(local.group_vars_map["default_tags"], tomap({Name=local.all_vars_map["tfrole"]}))
 }
 
 resource "aws_iam_policy" "policy" {
@@ -63,7 +63,7 @@ resource "aws_iam_policy" "policy" {
     ]
   })
 
-  tags = merge(local.group_vars_map["default_tags"], map("Name", local.all_vars_map["tfpolicy"]))
+  tags = merge(local.group_vars_map["default_tags"], tomap({Name=local.all_vars_map["tfpolicy"]}))
 }
 
 resource "aws_iam_role_policy_attachment" "tfrole" {

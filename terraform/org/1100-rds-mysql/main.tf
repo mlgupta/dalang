@@ -64,7 +64,7 @@ module "security_group" {
     },
   ]
 
-  tags = merge(local.group_vars_map["default_tags"], map("Name", lower("${local.group_vars_map["account_name"]}-rds-mysql")))
+  tags = merge(local.group_vars_map["default_tags"], tomap({Name=lower("${local.group_vars_map["account_name"]}-rds-mysql")}))
 }
 
 ################################################################################
@@ -119,5 +119,5 @@ module "db" {
     }
   ]
 
-  tags = merge(local.group_vars_map["default_tags"], map("Name", lower("${local.group_vars_map["account_name"]}-rds-mysql")))
+  tags = merge(local.group_vars_map["default_tags"], tomap({Name=lower("${local.group_vars_map["account_name"]}-rds-mysql")}))
 }

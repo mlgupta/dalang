@@ -25,7 +25,7 @@ resource "aws_vpc" "vpc" {
   enable_dns_support = true
   enable_dns_hostnames = true
 
-  tags = merge(local.group_vars_map["default_tags"], map("Name", "${local.group_vars_map["account_name"]}-vpc"))
+  tags = merge(local.group_vars_map["default_tags"], tomap({Name="${local.group_vars_map["account_name"]}-vpc"}))
 }
 
 resource "aws_internet_gateway" "igw" {
@@ -33,7 +33,7 @@ resource "aws_internet_gateway" "igw" {
     aws_vpc.vpc,
   ]
   vpc_id = aws_vpc.vpc.id
-  tags = merge(local.group_vars_map["default_tags"], map("Name", "${local.group_vars_map["account_name"]}-igw"))
+  tags = merge(local.group_vars_map["default_tags"], tomap({Name="${local.group_vars_map["account_name"]}-igw"}))
 }
 
 resource "aws_subnet" "private_subnet" {
@@ -46,7 +46,7 @@ resource "aws_subnet" "private_subnet" {
   vpc_id     = aws_vpc.vpc.id
   cidr_block = element(local.vpc_vars_map["private_subnet_cidr"],count.index)
   availability_zone = element(local.vpc_vars_map["azs"],count.index)
-  tags = merge(local.group_vars_map["default_tags"], map("Name", "org-${element(local.vpc_vars_map["azs"],count.index)}-privatesubnet${count.index+1}"))
+  tags = merge(local.group_vars_map["default_tags"], tomap({Name="org-${element(local.vpc_vars_map["azs"],count.index)}-privatesubnet${count.index+1}"}))
 }
 
 resource "aws_subnet" "public_subnet" {
@@ -61,7 +61,7 @@ resource "aws_subnet" "public_subnet" {
   availability_zone = element(local.vpc_vars_map["azs"],count.index)
   map_public_ip_on_launch = true
 
-  tags = merge(local.group_vars_map["default_tags"], map("Name", "org-${element(local.vpc_vars_map["azs"],count.index)}-publicsubnet${count.index+1}"))
+  tags = merge(local.group_vars_map["default_tags"], tomap({Name="org-${element(local.vpc_vars_map["azs"],count.index)}-publicsubnet${count.index+1}"}))
 }
 
 resource "aws_route_table" "igw_route_table" {
@@ -77,7 +77,7 @@ resource "aws_route_table" "igw_route_table" {
         gateway_id = aws_internet_gateway.igw.id
     }
 
-  tags = merge(local.group_vars_map["default_tags"], map("Name", "org-route-table"))
+  tags = merge(local.group_vars_map["default_tags"], tomap({Name="org-route-table"}))
 }
 
 resource "aws_route_table_association" "subnet_default_route" {

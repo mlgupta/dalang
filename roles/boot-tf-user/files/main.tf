@@ -23,7 +23,7 @@ resource "aws_iam_user" "tfuser" {
   name               = local.all_vars_map["tfuser"]
   force_destroy      = true
 
-  tags = merge(local.group_vars_map["default_tags"], map("Name", local.all_vars_map["tfuser"]))
+  tags = merge(local.group_vars_map["default_tags"], tomap({Name=local.all_vars_map["tfuser"]}))
 }
 
 resource "aws_iam_access_key" "access_key" {
