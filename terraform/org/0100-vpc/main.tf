@@ -61,7 +61,7 @@ resource "aws_subnet" "public_subnet" {
   availability_zone = element(local.vpc_vars_map["azs"],count.index)
   map_public_ip_on_launch = true
 
-  tags = merge(local.group_vars_map["default_tags"], tomap(Name="org-${element(local.vpc_vars_map["azs"],count.index)}-publicsubnet${count.index+1}"}))
+  tags = merge(local.group_vars_map["default_tags"], tomap({Name="org-${element(local.vpc_vars_map["azs"],count.index)}-publicsubnet${count.index+1}"}))
 }
 
 resource "aws_route_table" "igw_route_table" {
